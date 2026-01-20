@@ -1,70 +1,72 @@
-from game.state import GameState
-from game.actions import Action
-from game.categories import Category
-from game.scoring import score_category
+import pygame
+from game.engine import GameEngine
+from render.pygame_ui import PygameUI
+from render.menu import MainMenu
 
-
-def print_score_table(score_table):
-    print("\nTabela wyników:")
-    for cat, val in score_table.scores.items():
-        status = val if val is not None else "-"
-        print(f"{cat.name:15}: {status}")
-    print(f"Suma: {score_table.total_score()}\n")
 
 def main():
-    state = GameState()
-    print("=== Witaj w grze w kości (Kurnik) ===")
+    pygame.init()
+    screen = pygame.display.set_mode((800, 500))
+    pygame.display.set_caption("Kurnik – Gra w kości")
 
-    while not state.done:
-        state.rolls_left = 3  # reset rzutów na turę
-        state.current_round_score = 0
-        state.roll_dice(state.dice)
-        # Rzuty kośćmi
-        while state.rolls_left > 0:
-            print(f"\nKości: {state.dice} | Pozostało rzutów: {state.rolls_left}")
-            keep_input = input("Podaj indeksy kości do zatrzymania (np. 0 2) lub ENTER dla wszystkich: ")
-            keep = [False]*5
-            if keep_input.strip():
-                for i in map(int, keep_input.strip().split()):
-                    if 0 <= i < 5:
-                        keep[i] = True
 
-            state.roll_dice(keep)
-            print(f"Rzut: {state.dice}")
+    # ===== MENU =====
+    menu = MainMenu(screen)
+    mode = None
 
-            reroll = input("Czy chcesz rzucić ponownie? (t/n): ").lower()
-            if reroll != "t":
-                break
+    while mode is None:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                return
 
-        # Wybór kategorii
-        print_score_table(state.score_table)
-        available = [cat for cat in Category if state.score_table.is_available(cat)]
-        print("Dostępne kategorie:")
-        for idx, cat in enumerate(available):
-            print(f"{idx}: {cat.name}")
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                mode = menu.handle_click(event.pos)
 
-        choice = None
-        while choice is None:
-            try:
-                c = int(input("Wybierz kategorię: "))
-                if 0 <= c < len(available):
-                    choice = available[c]
-            except:
-                pass
+        menu.draw()
 
-        points = score_category(state.dice, choice)
-        state.score_table.set_score(choice, points)
-        print(f"Wybrałeś {choice.name}, zdobywasz {points} punktów")
+    # ===== START GRY =====
+    if mode == "solo":
+        engine = GameEngine(players=1)
+    elif mode == "2p":
+        engine = GameEngine(players=2)
+    elif mode == "ai":
+        engine = GameEngine(players=2)  # AI będzie graczem 2
+    else:
+        return
 
-        # Reset kości
-        state.dice = [0]*5
+    engine.start_turn()
+    ui = PygameUI(engine)
 
-        # Sprawdzenie końca gry
-        if all(v is not None for v in state.score_table.scores.values()):
-            state.done = True
+    running = True
+    while running:
 
-    print("\n=== KONIEC GRY ===")
-    print_score_table(state.score_table)
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                running = False
+
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                ui.handle_click(event.pos)
+
+        ui.draw()
+
+        if engine.game_over:
+            ui.screen.fill((0, 0, 0))
+            if engine.winner is None:
+                text = ui.big_font.render("REMIS!", True, (255, 255, 255))
+            else:
+                text = ui.big_font.render(
+                    f"WYGRYWA GRACZ {engine.winner + 1}!",
+                    True,
+                    (255, 255, 255)
+                )
+            ui.screen.blit(text, (300, 300))
+            pygame.display.flip()
+            pygame.time.wait(3000)
+            running = False
+
+    pygame.quit()
+
 
 if __name__ == "__main__":
     main()
