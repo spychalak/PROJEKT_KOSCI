@@ -1,6 +1,7 @@
 from game.state import GameState
 from game.categories import Category
 from game.scoring import score_category
+from game.actions import Action, ActionType
 
 
 class GameEngine:
@@ -22,7 +23,7 @@ class GameEngine:
     def start_turn(self):
         state = self.state
         state.rolls_left = 3
-        state.dice = [0] * 5
+        state.roll_dice()
 
     def next_player(self):
         self.current_player = (self.current_player + 1) % self.players
@@ -95,3 +96,14 @@ class GameEngine:
 
     def get_scores(self):
         return [state.score_table.total_score() for state in self.states]
+
+    def bot_turn(self, bot):
+        action = bot.choose_action(self.state)
+        self.apply_action(action)
+
+    def apply_action(self, action):
+        if action.type == ActionType.ROLL:
+            self.state.roll_dice(action.data)
+
+        elif action.type == ActionType.SELECT_CATEGORY:
+            self.choose_category(action.data)

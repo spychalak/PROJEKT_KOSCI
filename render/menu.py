@@ -13,6 +13,7 @@ class MainMenu:
             ("Graj sam", "solo"),
             ("Graj z 2 graczem", "2p"),
             ("Graj z AI", "ai"),
+            ("Wyjscie", "q")
         ]
 
         self.buttons = []

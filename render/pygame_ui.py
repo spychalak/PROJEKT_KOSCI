@@ -25,7 +25,7 @@ class PygameUI:
         w, h = self.screen_rect.size
 
         # ===== TABELKA (LEWA STRONA) =====
-        self.table_rect = pygame.Rect(0, 0, 300, 420)
+        self.table_rect = pygame.Rect(0, 0, 300, 440)
         self.table_rect.left = 30
         self.table_rect.centery = self.screen_rect.centery
 
@@ -91,11 +91,12 @@ class PygameUI:
                 self.table_rect.width - 20,
                 26
             )
+            y += 2
 
             # podświetlenie możliwego wyniku
             if state.score_table.is_available(cat):
                 preview = score_category(state.dice, cat)
-                color = (210, 230, 255)
+                color = (210, 210, 210)
                 pygame.draw.rect(self.screen, color, row_rect)
 
                 val_text = self.font.render(str(preview), True, (0, 0, 180))
@@ -162,6 +163,7 @@ class PygameUI:
                 self.table_rect.width - 20,
                 26
             )
+            y += 2
             if row_rect.collidepoint(pos):
                 self.engine.choose_category(cat)
                 self.held = [False] * 5

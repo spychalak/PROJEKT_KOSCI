@@ -41,11 +41,7 @@ def score_category(dice, category):
         
     if category == Category.SMALL_STRAIGHT:
         straight = sorted(set(dice))
-        if (
-                straight[:4] == [1, 2, 3, 4] or
-                straight[1:5] == [2, 3, 4, 5] or
-                straight[2:6] == [3, 4, 5, 6]
-        ):
+        if straight[:4] == [1, 2, 3, 4] or straight[:4] == [2, 3, 4, 5] or straight[:4] == [3, 4, 5, 6]:
             return 30
         else:
             return 0
