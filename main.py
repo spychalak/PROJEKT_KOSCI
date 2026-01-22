@@ -2,7 +2,9 @@ import pygame
 from game.engine import GameEngine
 from render.pygame_ui import PygameUI
 from render.menu import MainMenu
+from render.bot_menu import BotMenu
 from ai.random_bot import RandomBot
+from ai.greedy_bot import GreedyBot
 
 
 def main():
@@ -15,6 +17,7 @@ def main():
         # ===== MENU =====
         menu = MainMenu(screen)
         mode = None
+        ai_bot = None
 
         while mode is None:
             for event in pygame.event.get():
@@ -33,8 +36,24 @@ def main():
         elif mode == "2p":
             engine = GameEngine(players=2)
         elif mode == "ai":
+            bot_menu = BotMenu(screen)
+            bot_choice = None
+            while bot_choice is None:
+                for event in pygame.event.get():
+                    if event.type == pygame.QUIT:
+                        pygame.quit()
+                        return
+                    if event.type == pygame.MOUSEBUTTONDOWN:
+                        bot_choice = bot_menu.handle_click(event.pos)
+
+                bot_menu.draw()
+            if bot_choice == "random":
+                ai_bot = RandomBot()
+            elif bot_choice == "greedy":
+                ai_bot = GreedyBot()
+            elif bot_choice == "back":
+                continue
             engine = GameEngine(players=2)  # AI będzie graczem 2
-            ai_bot = RandomBot()
         elif mode == "q":
             return 0
         else:
