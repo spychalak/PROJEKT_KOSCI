@@ -12,6 +12,7 @@ class MainMenu:
         self.options = [
             ("Graj sam", "solo"),
             ("Graj z 2 graczem", "2p"),
+            ("Trenuj AI", "train"),
             ("Graj z AI", "ai"),
             ("Wyjscie", "q")
         ]
