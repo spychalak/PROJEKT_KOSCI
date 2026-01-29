@@ -19,17 +19,18 @@ class PygameUI:
 
         self._create_layout()
 
-    # ===================== LAYOUT =====================
+        self.ai_message_lines = []
+        self.ai_wait_until = 0
 
     def _create_layout(self):
         w, h = self.screen_rect.size
 
-        # ===== TABELKA (LEWA STRONA) =====
+        # TABELKA
         self.table_rect = pygame.Rect(0, 0, 300, 440)
         self.table_rect.left = 30
         self.table_rect.centery = self.screen_rect.centery
 
-        # ===== KOŚCI (PRAWA STRONA) =====
+        # KOŚCI
         dice_area = pygame.Rect(0, 0, 320, 120)
         dice_area.right = self.screen_rect.right - 30
         dice_area.top = self.table_rect.top + 30
@@ -55,7 +56,6 @@ class PygameUI:
         self.roll_button_rect.centerx = dice_area.centerx
         self.roll_button_rect.top = dice_area.bottom + 30
 
-    # ===================== RYSOWANIE =====================
 
     def draw(self):
         self.screen.fill((245, 245, 245))
@@ -64,19 +64,28 @@ class PygameUI:
         self._draw_table()
         self._draw_dice()
         self._draw_roll_button()
+        self._draw_ai_info()
 
         pygame.display.flip()
 
     def _draw_header(self):
-        text = self.big_font.render(
-            f"Gracz {self.engine.current_player + 1}",
-            True,
-            (0, 0, 0)
-        )
-        rect = text.get_rect(center=(self.screen_rect.centerx, 30))
-        self.screen.blit(text, rect)
+        y = 15
 
-    # ===== TABELKA =====
+        for i, state in enumerate(self.engine.states):
+            total = state.score_table.total_score()
+
+            label = f"Gracz {i + 1}"
+            text = f"{label}: {total} pkt"
+
+            # aktywny gracz pogrubiony
+            font = self.big_font if i == self.engine.current_player else self.font
+            color = (0, 0, 0)
+
+            render = font.render(text, True, color)
+            rect = render.get_rect(center=(self.screen_rect.centerx, y))
+            self.screen.blit(render, rect)
+
+            y += 26
 
     def _draw_table(self):
         pygame.draw.rect(self.screen, (220, 220, 220), self.table_rect, border_radius=8)
@@ -110,12 +119,10 @@ class PygameUI:
 
             y += 28
 
-        # ===== SUMA =====
-        total = state.score_table.total_score()
-        total_text = self.font.render(f"Suma: {total}", True, (0, 0, 0))
-        self.screen.blit(total_text, (self.table_rect.left + 10, self.table_rect.bottom - 30))
-
-    # ===== KOŚCI =====
+        # SUMA DÓŁ
+        #total = state.score_table.total_score()
+        #total_text = self.font.render(f"Suma: {total}", True, (0, 0, 0))
+        #self.screen.blit(total_text, (self.table_rect.left + 10, self.table_rect.bottom - 30))
 
     def _draw_dice(self):
         for i, rect in enumerate(self.dice_rects):
@@ -129,8 +136,6 @@ class PygameUI:
                 text_rect = text.get_rect(center=rect.center)
                 self.screen.blit(text, text_rect)
 
-    # ===== ROLL =====
-
     def _draw_roll_button(self):
         if self.engine.state.rolls_left <= 0:
             return
@@ -140,7 +145,21 @@ class PygameUI:
         label_rect = label.get_rect(center=self.roll_button_rect.center)
         self.screen.blit(label, label_rect)
 
-    # ===================== INPUT =====================
+    def _draw_ai_info(self):
+        if not self.ai_message_lines:
+            return
+
+        # półprzezroczyste tło
+        overlay = pygame.Surface((self.screen_rect.width, 80))
+        overlay.set_alpha(180)
+        overlay.fill((0, 0, 0))
+        self.screen.blit(overlay, (0, self.screen_rect.bottom - 80))
+
+        y = self.screen_rect.bottom - 70
+        for line in self.ai_message_lines:
+            text = self.font.render(line, True, (255, 255, 255))
+            self.screen.blit(text, (20, y))
+            y += 24
 
     def handle_click(self, pos):
         # ROLL
@@ -169,3 +188,11 @@ class PygameUI:
                 self.held = [False] * 5
                 return
             y += 28
+
+    def show_ai_decision(self, lines, delay_ms=2000):
+        self.ai_message_lines = lines
+        self.ai_wait_until = pygame.time.get_ticks() + delay_ms
+
+    def clear_ai_decision(self):
+        self.ai_message_lines = []
+        self.ai_wait_until = 0

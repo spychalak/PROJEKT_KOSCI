@@ -8,7 +8,4 @@ class BaseBot(ABC):
 
     @abstractmethod
     def choose_action(self, game_state) -> Action:
-        """
-        Zwraca Action na podstawie aktualnego GameState
-        """
         pass

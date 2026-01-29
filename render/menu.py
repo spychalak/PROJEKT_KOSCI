@@ -14,6 +14,7 @@ class MainMenu:
             ("Graj z 2 graczem", "2p"),
             ("Trenuj AI", "train"),
             ("Graj z AI", "ai"),
+            ("Symulacja", "sim"),
             ("Wyjscie", "q")
         ]
 
@@ -40,12 +41,12 @@ class MainMenu:
     def draw(self):
         self.screen.fill((30, 30, 30))
 
-        # ===== TYTUŁ =====
+        # TYTUŁ
         title = self.big_font.render("KURNIK – GRA W KOŚCI", True, (255, 255, 255))
-        title_rect = title.get_rect(center=(self.screen_rect.centerx, 120))
+        title_rect = title.get_rect(center=(self.screen_rect.centerx, 40))
         self.screen.blit(title, title_rect)
 
-        # ===== PRZYCISKI =====
+        # BUTTONY
         for rect, text, _ in self.buttons:
             pygame.draw.rect(self.screen, (80, 80, 80), rect, border_radius=8)
 

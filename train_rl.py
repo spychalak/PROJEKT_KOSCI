@@ -1,22 +1,23 @@
+from ai.learning_bot_RL_HEU import LearningBotRL_plus_Heu
 from game.engine import GameEngine
 from ai.learning_bot_RL import LearningBotRL
 from ai.RL_storage import save_model, load_model, model_exists
 import time
 
 
-def train_rl(episodes=3000, resume=False):
+def train_rl(episodes, resume=False):
     print("\n=== TRENING RL ===\n")
 
     if resume and model_exists():
         Q, epsilon, done = load_model()
-        bot = LearningBotRL(alpha=0.1, gamma=0.95, epsilon=epsilon)
+        bot = LearningBotRL_plus_Heu()
         bot.Q = Q
         start_episode = done
-        print(f"[INFO] Kontynuacja treningu od epizodu {done}")
+        print(f"Kontynuacja treningu od epizodu {done}")
     else:
-        bot = LearningBotRL(alpha=0.1, gamma=0.95, epsilon=0.3)
+        bot = LearningBotRL_plus_Heu()
         start_episode = 0
-        print("[INFO] Nowy trening")
+        print("Nowy trening")
 
     bot.training = True
     start_time = time.time()
@@ -34,7 +35,8 @@ def train_rl(episodes=3000, resume=False):
 
         bot.learn(50, engine.state)
 
-        bot.epsilon = max(0.02, bot.epsilon * 0.999)
+        print(len(bot.Q))
+        bot.end_episode()
 
         if ep % 100 == 0:
             elapsed = time.time() - start_time
@@ -42,5 +44,5 @@ def train_rl(episodes=3000, resume=False):
 
     save_model(bot.Q, bot.epsilon, start_episode + episodes)
 
-    print("\n✅ TRENING ZAKOŃCZONY")
+    print("\nTRENING ZAKOŃCZONY")
     print(f"Zapisano epizody: {start_episode + episodes}")

@@ -11,13 +11,15 @@ def action_key(action):
 
 
 class LearningBotRL(BaseBot):
-    def __init__(self, alpha=0.1, gamma=0.95, epsilon=0.3):
+    def __init__(self, alpha=0.05, gamma=0.98, epsilon_start=0.6, epsilon_min=0.05, epsilon_decay=0.9995):
         super().__init__("LearningBotRL")
 
         self.Q = defaultdict(float)
         self.alpha = alpha      # learning rate
         self.gamma = gamma      # discount
-        self.epsilon = epsilon  # eksploracja
+        self.epsilon = epsilon_start  # eksploracja
+        self.epsilon_min = epsilon_min
+        self.epsilon_decay = epsilon_decay
 
         self.last_state = None
         self.last_action = None
@@ -95,4 +97,10 @@ class LearningBotRL(BaseBot):
 
         self.Q[(s, a)] += self.alpha * (
             reward + self.gamma * future - self.Q[(s, a)]
+        )
+
+    def end_episode(self):
+        self.epsilon = max(
+            self.epsilon_min,
+            self.epsilon * self.epsilon_decay
         )
